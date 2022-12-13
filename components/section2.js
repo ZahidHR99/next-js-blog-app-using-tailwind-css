@@ -1,48 +1,56 @@
 import Image from "next/image"
 import Link from "next/link"
 import Author from "./_author/author"
-import getPost from "../lib/helper"
+import fetcher from "../lib/fetcher"
+import Spinner from "./_author/spinner"
+import Error from "./_author/error"
 
 export default function Section2() {
-    getPost(3).then(res=>console.log(res))
-    
+   
+    const {data, isLoading, isError} = fetcher()
+
+    if(isLoading) return <Spinner></Spinner>
+    if(isError) return <Error>Error</Error>
+
   return (
     <section className="container mx-auto md:px-20 py-10">
         <h1 className="font-bold text-4xl py-12 text-center">Latest Post</h1>
 
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-10">
-            { Post() }
-            { Post() }
-            { Post() }
-            { Post() }
-            { Post() }
-            { Post() }
+           {
+            data.map((value,index)=>{
+                <Post data={value} key={index}></Post>
+            })
+           }
         </div>
     </section>
-
   )
 }
 
-function Post(){
+function Post({data}){
+    const {id, title, category, img, description, published, author} = data;
     return(
-        <div className="item shadow-sm">
+        <div className="item shadow-sm" key={id}>
             <div className="images">
                 <Link href={"/"}>
-                    <Image src={"/images/04.jpg"} className="rounded" width={500} height={350}/> 
+                    <Image src={img || "/"} className="rounded" width={500} height={350}/> 
                 </Link>
             </div>
             <div className="info flex justify-center flex-col py-4">
                 <div className="cat">
-                    <Link href={"/"} className="text-orange-600 hover:text-orange-800 px-2">Agro Category | </Link>
-                    <Link href={"/"} className="text-gray-600 hover:text-gray-600"> Published: 01-12-2022</Link>
+                    <Link href={"/"} className="text-orange-600 hover:text-orange-800 px-2">{category || "Unknown"} | </Link>
+                    <Link href={"/"} className="text-gray-600 hover:text-gray-600"> Published: {published || "Unknown" }</Link>
                 </div>
                 <div className="title px-2">
-                    <Link href={"/"} className="text-xl font-bold text-gray-800 hover:text-gray-600"> Why do we use it? </Link>
+                    <Link href={"/"} className="text-xl font-bold text-gray-800 hover:text-gray-600"> {title || "Unknown" } </Link>
                 </div>
                 <p className="text-gray-900 text-bold py-2 px-2">
-                    content here', making it look like readable English. Many desktop publishing packages and web page editors now use Lorem Ipsum as their default model text, and a search for 'lorem ipsum' will uncover many web sites still in their infancy. Various versions have evolved over the years, sometimes by accident, sometimes on purpose (injected humour and the like).
+                    {description || "Unknown"}
                 </p> 
-                <Author/>
+                {
+                    author ?<Author></Author> : <></>
+                }
+              
             </div>
         </div>
     )
